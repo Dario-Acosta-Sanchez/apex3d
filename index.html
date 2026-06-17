@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX-1 · Punta de Nariz · TFG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:           #050608;
+            --bg-2:         #0a0c14;
+            --bg-card:      #0e1120;
+            --cyan:         #00e5f5;
+            --cyan-dim:     rgba(0, 229, 245, 0.10);
+            --cyan-glow:    rgba(0, 229, 245, 0.35);
+            --amber:        #f59e0b;
+            --amber-dim:    rgba(245, 158, 11, 0.15);
+            --text:         #b8ccd8;
+            --text-bright:  #e4f0f8;
+            --text-muted:   #3d5060;
+            --border:       rgba(0, 229, 245, 0.10);
+            --border-hi:    rgba(0, 229, 245, 0.30);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            overflow-x: hidden;
+        }
+
+        /* Blueprint grid */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,229,245,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,229,245,.025) 1px, transparent 1px),
+                linear-gradient(rgba(0,229,245,.012) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,229,245,.012) 1px, transparent 1px);
+            background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── HERO ─────────────────────────────────── */
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 640px;
+            height: 640px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,229,245,.07) 0%, transparent 70%);
+            animation: pulse 7s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes pulse {
+            0%,100% { transform: scale(1);   opacity: .7; }
+            50%      { transform: scale(1.1); opacity: 1;  }
+        }
+
+        .hero-eyebrow {
+            font-size: .62rem;
+            letter-spacing: .38em;
+            text-transform: uppercase;
+            color: var(--cyan);
+            margin-bottom: 1.6rem;
+            opacity: 0;
+            animation: fadeUp .8s .3s forwards;
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.6rem, 9vw, 6.5rem);
+            font-weight: 900;
+            color: var(--text-bright);
+            line-height: .95;
+            letter-spacing: -.02em;
+            opacity: 0;
+            animation: fadeUp .8s .5s forwards;
+        }
+        .hero-title span { color: var(--cyan); display: block; }
+
+        .hero-sub {
+            font-size: clamp(.7rem, 1.8vw, .85rem);
+            color: var(--text-muted);
+            letter-spacing: .1em;
+            margin-top: 1.5rem;
+            margin-bottom: 2.8rem;
+            line-height: 1.7;
+            opacity: 0;
+            animation: fadeUp .8s .7s forwards;
+        }
+
+        .hero-tags {
+            display: flex;
+            gap: .7rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeUp .8s .9s forwards;
+        }
+
+        .tag {
+            padding: .3rem .85rem;
+            border: 1px solid var(--border-hi);
+            font-size: .6rem;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            color: var(--cyan);
+            background: var(--cyan-dim);
+        }
+        .tag.amber {
+            border-color: rgba(245,158,11,.35);
+            color: var(--amber);
+            background: var(--amber-dim);
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .45rem;
+            opacity: 0;
+            animation: fadeUp .8s 1.3s forwards;
+        }
+        .scroll-hint span {
+            font-size: .52rem;
+            letter-spacing: .35em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .scroll-line {
+            width: 1px;
+            height: 44px;
+            background: linear-gradient(to bottom, var(--cyan), transparent);
+            animation: drip 2.2s ease-in-out infinite;
+        }
+        @keyframes drip {
+            0%,100% { opacity: 0; transform: scaleY(0) translateY(-20px); }
+            50%      { opacity: 1; transform: scaleY(1) translateY(0); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── SECTION SHELL ───────────────────────── */
+        .section {
+            position: relative;
+            z-index: 1;
+            padding: 6rem 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-hd {
+            display: flex;
+            align-items: baseline;
+            gap: 1.4rem;
+            margin-bottom: 3.5rem;
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .7s, transform .7s;
+        }
+        .section-hd.on { opacity: 1; transform: translateY(0); }
+
+        .sec-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: .68rem;
+            font-weight: 700;
+            color: var(--cyan);
+            letter-spacing: .22em;
+            white-space: nowrap;
+        }
+        .sec-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--border-hi), transparent);
+        }
+        .sec-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1rem, 2.8vw, 1.5rem);
+            font-weight: 700;
+            color: var(--text-bright);
+            letter-spacing: .06em;
+            white-space: nowrap;
+        }
+
+        /* ── GRID ────────────────────────────────── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+        .grid-2.flip { direction: rtl; }
+        .grid-2.flip > * { direction: ltr; }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-2.flip {
+                grid-template-columns: 1fr;
+                direction: ltr;
+            }
+        }
+
+        /* ── PROSE ───────────────────────────────── */
+        .prose {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .7s .1s, transform .7s .1s;
+        }
+        .prose.on { opacity: 1; transform: translateY(0); }
+
+        .prose p {
+            font-size: .82rem;
+            line-height: 1.85;
+            color: var(--text);
+            margin-bottom: 1.2rem;
+        }
+        .prose strong { color: var(--cyan); font-weight: 500; }
+
+        /* ── SPEC CARD ───────────────────────────── */
+        .spec-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--cyan);
+            padding: 1.4rem;
+            margin-top: 1.6rem;
+        }
+        .spec-label {
+            font-size: .56rem;
+            letter-spacing: .32em;
+            text-transform: uppercase;
+            color: var(--cyan);
+            margin-bottom: 1rem;
+        }
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: .45rem 0;
+            border-bottom: 1px solid rgba(255,255,255,.04);
+            font-size: .72rem;
+        }
+        .spec-row:last-child { border: none; }
+        .spec-row .k { color: var(--text-muted); }
+        .spec-row .v { color: var(--text-bright); }
+        .spec-row .v.c { color: var(--cyan); }
+        .spec-row .v.w { color: var(--amber); }
+
+        /* ── IMAGE FRAME ─────────────────────────── */
+        .img-frame {
+            position: relative;
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .7s .2s, transform .7s .2s;
+        }
+        .img-frame.on { opacity: 1; transform: translateY(0); }
+
+        /* outer border */
+        .img-frame::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border: 1px solid var(--border-hi);
+            pointer-events: none;
+            z-index: 2;
+        }
+        /* top-right bracket */
+        .img-frame::after {
+            content: '';
+            position: absolute;
+            top: 8px; right: 8px;
+            width: 18px; height: 18px;
+            border-top: 2px solid var(--cyan);
+            border-right: 2px solid var(--cyan);
+            pointer-events: none;
+            z-index: 3;
+        }
+        /* bottom-left bracket */
+        .brk {
+            position: absolute;
+            bottom: 34px; left: 8px;  /* above caption */
+            width: 18px; height: 18px;
+            border-bottom: 2px solid var(--cyan);
+            border-left: 2px solid var(--cyan);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .img-inner { position: relative; overflow: hidden; }
+        .img-inner img {
+            width: 100%;
+            display: block;
+            filter: brightness(.88) contrast(1.08);
+            transition: filter .35s;
+        }
+        .img-frame:hover .img-inner img {
+            filter: brightness(1) contrast(1.1);
+        }
+
+        /* scan line on hover */
+        .img-inner::after {
+            content: '';
+            position: absolute;
+            top: -100%; left: 0;
+            width: 100%; height: 2px;
+            background: linear-gradient(to right, transparent, var(--cyan), transparent);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .img-frame:hover .img-inner::after {
+            opacity: .55;
+            animation: scan 1.6s linear infinite;
+        }
+        @keyframes scan {
+            0%   { top: -2px; }
+            100% { top: 100%; }
+        }
+
+        .img-cap {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-top: none;
+            padding: .65rem 1rem;
+            font-size: .6rem;
+            letter-spacing: .14em;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .img-cap .fig { color: var(--cyan); font-weight: 500; }
+
+        /* ── DUAL IMAGE GRID ─────────────────────── */
+        .img-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.4rem;
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .7s .15s, transform .7s .15s;
+        }
+        .img-pair.on { opacity: 1; transform: translateY(0); }
+        @media (max-width: 600px) { .img-pair { grid-template-columns: 1fr; } }
+
+        /* ── NOTE BOX ────────────────────────────── */
+        .note {
+            position: relative;
+            background: linear-gradient(135deg, rgba(0,229,245,.065), rgba(0,229,245,.018));
+            border: 1px solid var(--border-hi);
+            padding: 1.8rem 2.2rem;
+            margin-top: 2.8rem;
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity .7s, transform .7s;
+        }
+        .note.on { opacity: 1; transform: translateY(0); }
+        .note::before {
+            content: 'NOTA TÉCNICA';
+            position: absolute;
+            top: -.55rem; left: 1.4rem;
+            font-size: .52rem;
+            letter-spacing: .3em;
+            background: var(--bg);
+            padding: 0 .5rem;
+            color: var(--cyan);
+        }
+        .note p { font-size: .82rem; line-height: 1.82; color: var(--text); }
+        .note strong { color: var(--cyan); font-weight: 500; }
+
+        /* ── TERMINAL BLOCK ──────────────────────── */
+        .terminal {
+            background: #050607;
+            border: 1px solid var(--border);
+            padding: 1.2rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .tl { font-size: .72rem; padding: .2rem 0; }
+        .tl .p { color: var(--cyan); margin-right: .5rem; }
+        .tl .c { color: var(--text-bright); }
+        .tl.out { padding-left: 1.4rem; color: var(--text-muted); }
+
+        /* ── RESULT CARDS ────────────────────────── */
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2.2rem;
+        }
+        @media (max-width: 640px) { .result-grid { grid-template-columns: 1fr; } }
+
+        .r-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity .55s, transform .55s;
+        }
+        .r-card.on { opacity: 1; transform: translateY(0); }
+        .r-card:hover { border-color: var(--border-hi); }
+
+        .r-icon { font-size: 1.4rem; display: block; margin-bottom: .75rem; }
+        .r-card h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .16em;
+            color: var(--cyan);
+            margin-bottom: .5rem;
+        }
+        .r-card p { font-size: .72rem; line-height: 1.65; color: var(--text-muted); }
+
+        /* ── DIVIDER ─────────────────────────────── */
+        .div {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            border: none;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── FOOTER ──────────────────────────────── */
+        footer {
+            position: relative;
+            z-index: 1;
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+        footer p { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: var(--text-muted); }
+        footer .fc { color: var(--cyan); margin-top: .3rem; }
+    </style>
+</head>
+<body>
+
+<!-- ════════════════════ HERO ════════════════════ -->
+<section class="hero">
+    <div class="hero-glow"></div>
+    <p class="hero-eyebrow">TFG · Diseño y Fabricación Aditiva · 2024</p>
+    <h1 class="hero-title">
+        PUNTA DE
+        <span>NARIZ</span>
+    </h1>
+    <p class="hero-sub">
+        Diseño, laminado e impresión 3D en TPU<br>
+        para cohete de agua de alta presión
+    </p>
+    <div class="hero-tags">
+        <span class="tag">Impresión 3D</span>
+        <span class="tag">TPU 95A</span>
+        <span class="tag">Cohete de Agua</span>
+        <span class="tag amber">TFG — Optimización</span>
+    </div>
+    <div class="scroll-hint">
+        <span>Scroll</span>
+        <div class="scroll-line"></div>
+    </div>
+</section>
+
+<!-- ════════════════════ 01 · CONTEXTO ════════════════════ -->
+<div class="section">
+    <div class="section-hd">
+        <span class="sec-num">[ 01 ]</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title">CONTEXTO DEL PROYECTO</h2>
+    </div>
+
+    <div class="grid-2">
+        <div class="prose">
+            <p>
+                El <strong>TFG de Unai</strong> aborda la optimización aerodinámica y balística de cohetes impulsados por presión de agua. Aunque aparentemente simples, estos cohetes plantean desafíos reales: estabilidad en vuelo, eficiencia de la tobera y capacidad de absorción del impacto en el aterrizaje.
+            </p>
+            <p>
+                Para la fase experimental, el proyecto necesitaba una <strong>punta de nariz intercambiable y reutilizable</strong>: una pieza capaz de soportar aterrizajes repetidos sin fracturarse, y fácil de fabricar para iterar distintos perfiles aerodinámicos.
+            </p>
+            <p>
+                La fabricación aditiva era la vía obvia. El verdadero problema de diseño era la elección del <strong>material correcto</strong>.
+            </p>
+        </div>
+        <div class="prose" style="transition-delay:.2s">
+            <div class="terminal">
+                <div class="tl"><span class="p">$</span><span class="c">cat proyecto.txt</span></div>
+                <div class="tl out">// Tipo de cohete: Agua + Presión</div>
+                <div class="tl out">// Altura objetivo: &gt; 30 m</div>
+                <div class="tl out">// Iteraciones previstas: múltiples</div>
+                <div class="tl out">// Restricción: aterrizaje sin paracaídas</div>
+                <br>
+                <div class="tl"><span class="p">$</span><span class="c">cat material_analysis.txt</span></div>
+                <div class="tl out">// PLA / PETG  → frágil en impacto  ✗</div>
+                <div class="tl out">// ABS         → difícil de imprimir ✗</div>
+                <div class="tl out">// TPU 95A     → flexible + durable  ✓</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="div">
+
+<!-- ════════════════════ 02 · DISEÑO CAD ════════════════════ -->
+<div class="section">
+    <div class="section-hd">
+        <span class="sec-num">[ 02 ]</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title">DISEÑO CAD</h2>
+    </div>
+
+    <div class="grid-2">
+        <div class="img-frame">
+            <div class="img-inner">
+                <img src="objeto_diseño.jpeg" alt="Diseño CAD de la punta de nariz">
+            </div>
+            <div class="brk"></div>
+            <div class="img-cap">
+                <span class="fig">FIG.01</span>
+                <span>Modelo CAD — Punta de nariz</span>
+                <span>Vista de diseño</span>
+            </div>
+        </div>
+
+        <div class="prose">
+            <p>
+                La geometría sigue un <strong>perfil ogival tangente</strong>, optimizado para minimizar la resistencia aerodinámica a baja velocidad. La transición suave entre el cuerpo cilíndrico y el extremo cónico reduce la turbulencia en las primeras fracciones de segundo tras el lanzamiento.
+            </p>
+            <p>
+                El modelo incorpora un <strong>encaje de fricción</strong> en la base para unirse al tubo del cohete sin tornillos — fundamental para una instalación y retirada rápidas entre vuelos.
+            </p>
+
+            <div class="spec-card">
+                <div class="spec-label">Especificaciones de diseño</div>
+                <div class="spec-row">
+                    <span class="k">Perfil aerodinámico</span>
+                    <span class="v c">Ogival tangente</span>
+                </div>
+                <div class="spec-row">
+                    <span class="k">Material</span>
+                    <span class="v c">TPU 95A</span>
+                </div>
+                <div class="spec-row">
+                    <span class="k">Unión al cohete</span>
+                    <span class="v">Encaje de fricción</span>
+                </div>
+                <div class="spec-row">
+                    <span class="k">Reutilizable</span>
+                    <span class="v w">Sí — diseñado para impacto</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="div">
+
+<!-- ════════════════════ 03 · LAMINADO ════════════════════ -->
+<div class="section">
+    <div class="section-hd">
+        <span class="sec-num">[ 03 ]</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title">LAMINADO Y PREPARACIÓN</h2>
+    </div>
+
+    <div class="grid-2 flip">
+        <div class="img-frame">
+            <div class="img-inner">
+                <img src="objeto_laminado.jpeg" alt="Vista laminada en slicer">
+            </div>
+            <div class="brk"></div>
+            <div class="img-cap">
+                <span class="fig">FIG.02</span>
+                <span>Capas en slicer</span>
+                <span>Pre-impresión</span>
+            </div>
+        </div>
+
+        <div class="prose">
+            <p>
+                El TPU exige <strong>ajustes específicos</strong> frente a filamentos rígidos. Su naturaleza flexible obliga a reducir velocidad de impresión y minimizar la retracción para evitar atascos en el extrusor Bowden.
+            </p>
+            <p>
+                La estrategia de capas prioriza la <strong>resistencia al impacto</strong>: paredes gruesas con cuatro perímetros, relleno en patrón giroide al 25% para absorción isotrópica de energía, y capa de 0.2 mm para superficie exterior precisa.
+            </p>
+
+            <div class="spec-card">
+                <div class="spec-label">Parámetros de laminado — TPU</div>
+                <div class="spec-row">
+                    <span class="k">Altura de capa</span>
+                    <span class="v c">0.20 mm</span>
+                </div>
+                <div class="spec-row">
+                    <span class="k">Perímetros</span>
+                    <span class="v">4 — pared robusta</span>
+                </div>
+                <div class="spec-row">
+                    <span class="k">Relleno</span>
+                    <span class="v">25% — Gyroid</span>
+                </div>
+                <div class="spec-row">
+                    <span class="k">Velocidad</span>
+                    <span class="v w">30 mm/s — lento para TPU</span>
+                </div>
+                <div class="spec-row">
+                    <span class="k">Retracción</span>
+                    <span class="v c">Mínima / desactivada</span>
+                </div>
+                <div class="spec-row">
+                    <span class="k">Temperatura boquilla</span>
+                    <span class="v">225 – 235 °C</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="note">
+        <p>
+            <strong>Por qué gyroid:</strong> el patrón de relleno giroide distribuye las fuerzas de impacto de forma isotrópica — igual en todas las direcciones. En una pieza que aterrizará con ángulos distintos en cada vuelo, esto garantiza una absorción de energía consistente sin zonas débiles localizadas.
+        </p>
+    </div>
+</div>
+
+<hr class="div">
+
+<!-- ════════════════════ 04 · IMPRESIÓN ════════════════════ -->
+<div class="section">
+    <div class="section-hd">
+        <span class="sec-num">[ 04 ]</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title">PROCESO DE IMPRESIÓN</h2>
+    </div>
+
+    <div class="prose" style="max-width: 680px; margin-bottom: 2.5rem;">
+        <p>
+            Con el fichero laminado y los parámetros validados, la pieza entra en producción. El TPU exige <strong>atención en las primeras capas</strong>: la adhesión a la cama es crítica, ya que el material flexible tiende a despegarse si la temperatura o la altura del primer layer no son exactas.
+        </p>
+    </div>
+
+    <div class="img-pair">
+        <div class="img-frame" style="transition-delay:0s">
+            <div class="img-inner">
+                <img src="impresoraCompleta.jpeg" alt="Vista completa de la impresora durante la impresión">
+            </div>
+            <div class="brk"></div>
+            <div class="img-cap">
+                <span class="fig">FIG.03</span>
+                <span>Vista general — Impresora en operación</span>
+            </div>
+        </div>
+        <div class="img-frame" style="transition-delay:.25s">
+            <div class="img-inner">
+                <img src="impresoraZoom.jpeg" alt="Zoom del cabezal extrusor durante la impresión">
+            </div>
+            <div class="brk"></div>
+            <div class="img-cap">
+                <span class="fig">FIG.04</span>
+                <span>Detalle del extrusor — Mid-print</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="prose" style="margin-top:2.5rem; max-width: 720px;">
+        <p>
+            El tiempo total de impresión fue de aproximadamente <strong>2.5–3 horas</strong> a baja velocidad. La reducción a 30 mm/s es el coste de trabajar con TPU en extrusor Bowden: a esa velocidad el filamento flexible no tiene tiempo de pandearse dentro del tubo, garantizando una extrusión constante sin interrupciones.
+        </p>
+    </div>
+</div>
+
+<hr class="div">
+
+<!-- ════════════════════ 05 · RESULTADO ════════════════════ -->
+<div class="section">
+    <div class="section-hd">
+        <span class="sec-num">[ 05 ]</span>
+        <div class="sec-line"></div>
+        <h2 class="sec-title">RESULTADO Y CONCLUSIÓN</h2>
+    </div>
+
+    <div class="prose" style="max-width: 720px; margin-bottom: 2.8rem;">
+        <p>
+            La pieza final cumple todos los requisitos funcionales. La <strong>punta de nariz en TPU</strong> absorbe los impactos de aterrizaje deformándose elásticamente y recuperando su forma — sin fisuras, sin delaminación, sin degradación visible tras múltiples lanzamientos.
+        </p>
+        <p>
+            Esto convierte al cohete en un sistema <strong>completamente reutilizable</strong>, fundamental para el carácter experimental del TFG: Unai puede lanzar, recuperar y relanzar sin coste de fabricación adicional ni pérdida de datos entre vuelos.
+        </p>
+    </div>
+
+    <div class="result-grid">
+        <div class="r-card">
+            <span class="r-icon">⚡</span>
+            <h4>Absorción de impacto</h4>
+            <p>Se deforma al contacto y recupera su forma original. Sin roturas, sin fisuras.</p>
+        </div>
+        <div class="r-card" style="transition-delay:.1s">
+            <span class="r-icon">♻</span>
+            <h4>Reutilizable</h4>
+            <p>Una sola pieza aguanta decenas de vuelos. Coste marginal por lanzamiento: cero.</p>
+        </div>
+        <div class="r-card" style="transition-delay:.2s">
+            <span class="r-icon">⚙</span>
+            <h4>Intercambiable</h4>
+            <p>El encaje de fricción permite cambiar la punta en segundos para iterar distintos perfiles.</p>
+        </div>
+    </div>
+
+    <div class="note">
+        <p>
+            El proyecto demuestra que <strong>la elección del material es tan decisiva como el diseño geométrico</strong>. Una punta en PLA hubiera sido más fácil de imprimir, pero se habría fracturado en el primer aterrizaje. El TPU, con sus exigencias de proceso, es la única opción real para este caso de uso.
+        </p>
+    </div>
+</div>
+
+<!-- ════════════════════ FOOTER ════════════════════ -->
+<footer>
+    <p>Fabricado para el TFG de Unai · Optimización de Cohetes de Agua</p>
+    <p class="fc">Diseño &amp; Fabricación 3D · TPU 95A · 2024</p>
+</footer>
+
+<script>
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('on'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll(
+        '.section-hd, .prose, .img-frame, .img-pair, .note, .r-card'
+    ).forEach(el => io.observe(el));
+</script>
+</body>
+</html>
